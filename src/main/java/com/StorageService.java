@@ -25,7 +25,6 @@ public class StorageService {
         return fileDAO.save(file);
     }
 
-
     public File transferFile(Long storageFromId, Long storageToId, Long fileId) throws BadRequestException, InternalServerError {
         File file = fileDAO.findById(File.class, fileId);
         Storage storageFrom = storageDAO.findById(Storage.class, storageFromId);
@@ -36,16 +35,13 @@ public class StorageService {
         return fileDAO.update(file);
     }
 
-    public Storage transferAll(Long storageFromId, Long storageToId) throws BadRequestException, InternalServerError {
+    public String transferAll(Long storageFromId, Long storageToId) throws BadRequestException, InternalServerError {
         Storage storageFrom = storageDAO.findById(Storage.class, storageFromId);
         Storage storageTo = storageDAO.findById(Storage.class, storageToId);
         Validator.validateStorageSize(storageFrom, storageTo);
         Validator.validateFormat(storageFrom, storageTo);
-        for (File file : storageFrom.getFiles()){
-            file.setStorage(storageTo);
-            fileDAO.update(file);
-        }
-        return storageDAO.update(storageTo);
+        storageDAO.transferAll(storageFrom.getId(),storageTo.getId());
+        return "Transfer is done";
     }
 
     public void delete(Long fileId) throws BadRequestException, InternalServerError {
