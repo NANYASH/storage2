@@ -1,0 +1,16 @@
+{
+  "file" : {
+    "name": "name1",
+    "format": "txt",
+    "size": "11",
+    "storage" : {
+     "id" : "1"
+    }
+  },
+  "file" : {
+    "id" : "7",
+    "name": "name1name1",
+    "format": "txt",
+    "size": "50"
+  }
+}
