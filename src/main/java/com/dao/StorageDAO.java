@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 public class StorageDAO extends GenericDAO<Storage> {
     private static final String DELETE_STORAGE = "DELETE FROM STORAGE WHERE ID=?";
     private static final String TRANSFER = "UPDATE С_FILE SET ID_STORAGE = ? WHERE ID_STORAGE=?";
+    private static final String FIND_FIELDS_BY_ID = "SELECT ID,FORMATS_SUPPORTED,STORAGE_COUNTRY,STORAGE_SIZE FROM STORAGE WHERE ID = ?";
 
     @Override
     public void delete(long id) throws InternalServerError {
@@ -47,4 +48,19 @@ public class StorageDAO extends GenericDAO<Storage> {
         }
 
     }
+
+    public Storage findStorageFieldsById(Long id) throws InternalServerError {
+        try(Session session = createSessionFactory().openSession()) {
+            NativeQuery query = session.createNativeQuery(FIND_FIELDS_BY_ID);
+            query.addEntity(Storage.class);
+            query.setParameter(1,id);
+            return (Storage) query.getSingleResult();
+        }catch (HibernateException e) {
+            System.err.println(e.getMessage());
+            throw new InternalServerError("Internal Server Error");
+        }
+    }
+
+
+
 }
