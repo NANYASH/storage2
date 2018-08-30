@@ -1,7 +1,5 @@
 package com.entity;
 
-import org.hibernate.Hibernate;
-
 import javax.persistence.*;
 import java.util.List;
 
