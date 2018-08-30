@@ -7,15 +7,15 @@ import com.exception.BadRequestException;
 
 public class Validator {
     public static boolean validateAll(Storage storage, File file) throws BadRequestException {
-        validateId(storage, file);
+        validateId(storage.getId(), file);
         validateFormat(storage, file);
         validateStorageSize(storage, file);
         return true;
     }
 
-    public static void validateId(Storage storage, File file) throws BadRequestException {
-        if (storage.getId()!=file.getStorage().getId())
-            throw new BadRequestException("File with id: "+file.getId()+" does not exist in the storage with id: "+storage.getId());
+    public static void validateId(long storageId, File file) throws BadRequestException {
+        if (storageId!=file.getStorage().getId())
+            throw new BadRequestException("File with id: "+file.getId()+" does not exist in the storage with id: "+storageId);
     }
 
     public static void validateFormat(Storage storage, File file) throws BadRequestException {

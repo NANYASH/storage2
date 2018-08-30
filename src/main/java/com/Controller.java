@@ -1,7 +1,6 @@
 package com;
 
 import com.entity.File;
-import com.entity.Storage;
 import com.exception.BadRequestException;
 import com.exception.InternalServerError;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
+import java.util.List;
 
 
 @org.springframework.stereotype.Controller
@@ -21,7 +21,6 @@ public class Controller {
     @Autowired
     StorageService storageService;
     private ObjectMapper mapper = new ObjectMapper();
-
 
     @RequestMapping(method = RequestMethod.POST, value = "/put", produces = "text/plain")
     @ResponseBody
@@ -39,24 +38,9 @@ public class Controller {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/transferFile", produces = "text/plain")
     @ResponseBody
-    public String transferFile(HttpServletRequest req) throws InternalServerError, BadRequestException {
-        ByteArrayInputStream inputStreamArray;
-        Long storageFromId;
-        Long storageToId;
-        Long fileId;
+    public String transferFile(@RequestParam long fromId, @RequestParam long toId, @RequestParam long id) throws InternalServerError, BadRequestException {
         try {
-            inputStreamArray = getInputStreamArray(req.getInputStream());
-            storageFromId = mapToId(inputStreamArray,"storageFromId");
-            inputStreamArray.reset();
-
-            storageToId = mapToId(inputStreamArray,"storageToId");
-            inputStreamArray.reset();
-
-            fileId = mapToId(inputStreamArray,"fileId");
-            return storageService.transferFile(storageFromId,storageToId,fileId).toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new InternalServerError("Internal server error");
+            return storageService.transferFile(fromId,toId,id).toString();
         } catch (BadRequestException e) {
             e.printStackTrace();
             throw new BadRequestException(e.getMessage());
@@ -66,20 +50,9 @@ public class Controller {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/transferAll", produces = "text/plain")
     @ResponseBody
-    public String transferAll(HttpServletRequest req) throws InternalServerError, BadRequestException {
-        ByteArrayInputStream inputStreamArray;
-        Long storageFromId;
-        Long storageToId;
+    public String transferAll(@RequestParam Long fromId,@RequestParam Long toId) throws InternalServerError, BadRequestException {
         try {
-            inputStreamArray = getInputStreamArray(req.getInputStream());
-            storageFromId = mapToId(inputStreamArray,"storageFromId");
-            inputStreamArray.reset();
-            storageToId = mapToId(inputStreamArray,"storageToId");
-            inputStreamArray.reset();
-            return storageService.transferAll(storageFromId,storageToId).toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new InternalServerError("Internal server error");
+            return storageService.transferAll(fromId,toId).toString();
         } catch (BadRequestException e) {
             e.printStackTrace();
             throw new BadRequestException(e.getMessage());
@@ -100,79 +73,19 @@ public class Controller {
         }
     }
 
-
-
-    private File mapToFile(InputStream stream) throws IOException {
-        return mapper.readValue(
-                mapper.writeValueAsString(mapper.readTree(stream).path("file")),
-                new TypeReference<File>() {
-                });
-
-
-    }
-    private Storage mapToStorage(InputStream stream,String node) throws IOException {
-        return mapper.readValue(
-                mapper.writeValueAsString(mapper.readTree(stream).path(node)),
-                new TypeReference<Storage>() {
-                });
-    }
-
-    private Long mapToId(InputStream stream,String node) throws IOException {
-        return mapper.readValue(
-                mapper.writeValueAsString(mapper.readTree(stream).path(node)),
-                new TypeReference<Long>() {
-                });
-    }
-
-    private ByteArrayInputStream getInputStreamArray(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        org.apache.commons.io.IOUtils.copy(inputStream, baos);
-        byte[] bytes = baos.toByteArray();
-        return new ByteArrayInputStream(bytes);
-    }
-
-
-
-
-
-
-
-    /*private Storage mapToStorage(InputStream stream) throws IOException {
-        return mapper.readValue(
-                mapper.writeValueAsString(mapper.readTree(req.getInputStream()).path("storage")),
-                new TypeReference<Storage>() {
-                });
-    }*/
-
-    /*private File mapToFile(HttpServletRequest req) throws IOException {
-      JsonParser jsonParser = mapper.getFactory().createParser(req.getInputStream());
-      File file = mapper.readValue(jsonParser, File.class);
-      return file;
-  }*/
-
-    /*public String put(HttpServletRequest req) throws InternalServerError, BadRequestException {
-        String message;
-        ByteArrayInputStream bais;
-        File file;
-        Storage storage;
+    private File mapToFile(InputStream stream) throws BadRequestException {
         try {
-            bais = getInputStreamArray(req.getInputStream());
-            file = mapToFile(bais);
-            bais.reset();
-            storage = mapToStorage(bais);
-            message = storageService.put(file,storage).toString();
-        } catch (BadRequestException e) {
-            e.printStackTrace();
-            throw new BadRequestException(e.getMessage());
+            return mapper.readValue(
+                    mapper.writeValueAsString(mapper.readTree(stream).path("file")),
+                    new TypeReference<File>() {
+                    });
         } catch (IOException e) {
             e.printStackTrace();
-            throw new InternalServerError("Internal server error");
+            throw new BadRequestException("Internal server error");
         }
-        return message;
-
-    }*/
-
-
-
-
+    }
 }
+
+
+
+

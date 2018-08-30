@@ -9,6 +9,8 @@ import org.hibernate.Transaction;
 import org.hibernate.query.NativeQuery;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class FileDAO extends GenericDAO<File> {
     private static final String DELETE_FILE = "DELETE FROM С_FILE WHERE ID=?";
@@ -29,5 +31,4 @@ public class FileDAO extends GenericDAO<File> {
             throw new InternalServerError("Internal Server Error");
         }
     }
-
 }
