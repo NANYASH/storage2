@@ -25,13 +25,10 @@ public class Controller {
     @ResponseBody
     public String put(HttpServletRequest req) throws InternalServerError, BadRequestException {
         try {
-            return storageService.put(mapToFile(req.getInputStream())).toString();
+            return storageService.put(mapToFile(req)).toString();
         } catch (BadRequestException e) {
             e.printStackTrace();
             throw new BadRequestException(e.getMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new InternalServerError("Internal server error");
         }
     }
 
@@ -71,10 +68,10 @@ public class Controller {
         }
     }
 
-    private File mapToFile(InputStream stream) throws BadRequestException {
+    private File mapToFile(HttpServletRequest req) throws BadRequestException {
         try {
             return mapper.readValue(
-                    mapper.writeValueAsString(mapper.readTree(stream).path("file")),
+                    mapper.writeValueAsString(mapper.readTree(req.getInputStream()).path("file")),
                     new TypeReference<File>() {
                     });
         } catch (IOException e) {
