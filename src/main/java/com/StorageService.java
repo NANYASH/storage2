@@ -23,13 +23,12 @@ public class StorageService {
         return fileDAO.save(file);
     }
 
-    public boolean transferFile(Long storageFromId, Long storageToId, Long fileId) throws BadRequestException, InternalServerError {
-        return storageDAO.transferFile(storageFromId,storageToId,fileId);
+    public String transferFile(Long storageFromId, Long storageToId, Long fileId) throws BadRequestException, InternalServerError {
+        return "Rows updated : "+storageDAO.transferFile(storageFromId,storageToId,fileId);
     }
 
     public String transferAll(Long storageFromId, Long storageToId) throws BadRequestException, InternalServerError {
-        storageDAO.transferAll(storageFromId,storageToId);
-        return "Transfer is done";
+        return "Rows updated : " + storageDAO.transferAll(storageFromId,storageToId);
     }
 
     public void delete(Long fileId) throws BadRequestException, InternalServerError {

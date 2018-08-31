@@ -27,7 +27,6 @@ public class StorageDAO extends GenericDAO<Storage> {
 
     public boolean transferFile(long from,long to, long fileId) throws InternalServerError, BadRequestException {
         Transaction tr = null;
-        int result;
         try (Session session = createSessionFactory().openSession()) {
             NativeQuery query = session.createNativeQuery(TRANSFER_FILE);
             query.addEntity(File.class);
@@ -39,17 +38,16 @@ public class StorageDAO extends GenericDAO<Storage> {
             query.setParameter(6, fileId);
             tr = session.getTransaction();
             tr.begin();
-            result = query.executeUpdate();
+            query.executeUpdate();
             tr.commit();
-            if (result!=0)return true;
-            throw new BadRequestException("BadRequest exception");
+            return true;
         } catch (HibernateException e) {
             System.err.println(e.getMessage());
             throw new InternalServerError("Internal Server Error");
         }
     }
 
-    public void transferAll(long from,long to) throws InternalServerError {
+    public boolean transferAll(long from,long to) throws InternalServerError, BadRequestException {
         Transaction tr = null;
         try(Session session = createSessionFactory().openSession()) {
             NativeQuery query = session.createNativeQuery(TRANSFER_ALL);
@@ -62,6 +60,7 @@ public class StorageDAO extends GenericDAO<Storage> {
             tr.begin();
             query.executeUpdate();
             tr.commit();
+            return true;
         }catch (HibernateException e){
             System.err.println(e.getMessage());
             throw new InternalServerError("Internal Server Error");

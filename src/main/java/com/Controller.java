@@ -37,7 +37,7 @@ public class Controller {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/transferFile", produces = "text/plain")
     @ResponseBody
-    public boolean transferFile(@RequestParam long fromId, @RequestParam long toId, @RequestParam long id) throws InternalServerError, BadRequestException {
+    public String transferFile(@RequestParam long fromId, @RequestParam long toId, @RequestParam long id) throws InternalServerError, BadRequestException {
         try {
             return storageService.transferFile(fromId,toId,id);
         } catch (BadRequestException e) {
@@ -45,7 +45,6 @@ public class Controller {
             throw new BadRequestException(e.getMessage());
         }
     }
-
 
     @RequestMapping(method = RequestMethod.PUT, value = "/transferAll", produces = "text/plain")
     @ResponseBody
