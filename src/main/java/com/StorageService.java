@@ -23,7 +23,7 @@ public class StorageService {
     }
 
     public String transferFile(Long storageFromId, Long storageToId, Long fileId) throws BadRequestException, InternalServerError {
-        return "Rows updated : "+storageDAO.transferFile(storageFromId,storageToId,fileId);
+        return "Rows updated : "+fileDAO.transferFile(storageFromId,storageToId,fileId);
     }
 
     public String transferAll(Long storageFromId, Long storageToId) throws BadRequestException, InternalServerError {

@@ -13,54 +13,33 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class StorageDAO extends GenericDAO<Storage> {
     private static final String DELETE_STORAGE = "DELETE FROM STORAGE WHERE ID=? ";
-    private static final String TRANSFER_FILE = "UPDATE С_FILE SET ID_STORAGE = " +
-            "(SELECT ID FROM STORAGE " +
-            "WHERE ID = ? AND " +
-            "FORMATS_SUPPORTED = (SELECT FILE_FORMAT FROM С_FILE WHERE ID = ?) AND " +
-            "(STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > (COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0))) " +
-            "WHERE ID_STORAGE = ? AND ID = ?";
-    private static final String TRANSFER_ALL = "UPDATE С_FILE SET ID_STORAGE = (SELECT ID FROM STORAGE " +
+
+    private static final String VALIDATE_STORAGE = "SELECT ID FROM STORAGE " +
             "WHERE ID = ? AND " +
             "FORMATS_SUPPORTED = (SELECT FORMATS_SUPPORTED FROM STORAGE WHERE ID = ?) AND " +
-            "(STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > (COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0))) " +
+            "(STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > (COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0))";
+
+    private static final String TRANSFER_ALL = "UPDATE С_FILE SET ID_STORAGE = ? " +
             "WHERE ID_STORAGE = ?";
 
-    public boolean transferFile(long from,long to, long fileId) throws InternalServerError, BadRequestException {
+    public int transferAll(long from,long to) throws InternalServerError, BadRequestException {
         Transaction tr = null;
-        try (Session session = createSessionFactory().openSession()) {
-            NativeQuery query = session.createNativeQuery(TRANSFER_FILE);
-            query.addEntity(File.class);
-            query.setParameter(1, to);
-            query.setParameter(2, fileId);
-            query.setParameter(3, to);
-            query.setParameter(4, fileId);
-            query.setParameter(5, from);
-            query.setParameter(6, fileId);
-            tr = session.getTransaction();
-            tr.begin();
-            query.executeUpdate();
-            tr.commit();
-            return true;
-        } catch (HibernateException e) {
-            System.err.println(e.getMessage());
-            throw new InternalServerError("Internal Server Error");
-        }
-    }
-
-    public boolean transferAll(long from,long to) throws InternalServerError, BadRequestException {
-        Transaction tr = null;
+        int result = 0;
         try(Session session = createSessionFactory().openSession()) {
-            NativeQuery query = session.createNativeQuery(TRANSFER_ALL);
-            query.setParameter(1,to);
-            query.setParameter(2,from);
-            query.setParameter(3,to);
-            query.setParameter(4,from);
-            query.setParameter(5,from);
+            NativeQuery validateQuery = session.createNativeQuery(VALIDATE_STORAGE);
+            NativeQuery updateQuery = session.createNativeQuery(TRANSFER_ALL);
+            validateQuery.setParameter(1,to);
+            validateQuery.setParameter(2,from);
+            validateQuery.setParameter(3,to);
+            validateQuery.setParameter(4,from);
+            updateQuery.setParameter(1,to);
+            updateQuery.setParameter(2,from);
             tr = session.getTransaction();
             tr.begin();
-            query.executeUpdate();
+            if (validateQuery.getSingleResult()!=null)
+                result = updateQuery.executeUpdate();
             tr.commit();
-            return true;
+            return result;
         }catch (HibernateException e){
             System.err.println(e.getMessage());
             throw new InternalServerError("Internal Server Error");
