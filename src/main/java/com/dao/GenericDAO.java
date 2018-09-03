@@ -60,7 +60,4 @@ public abstract class GenericDAO<T> {
             return new Configuration().configure().buildSessionFactory();}
         return sessionFactory;
     }
-
-
-
 }
