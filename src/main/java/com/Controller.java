@@ -19,13 +19,15 @@ import java.io.*;
 public class Controller {
     @Autowired
     StorageService storageService;
+    @Autowired
+    FileService fileService;
     private ObjectMapper mapper = new ObjectMapper();
 
     @RequestMapping(method = RequestMethod.POST, value = "/put", produces = "text/plain")
     @ResponseBody
     public String put(HttpServletRequest req) throws InternalServerError, BadRequestException {
         try {
-            return storageService.put(mapToFile(req)).toString();
+            return fileService.put(mapToFile(req)).toString();
         } catch (BadRequestException e) {
             e.printStackTrace();
             throw new BadRequestException(e.getMessage());
@@ -36,7 +38,7 @@ public class Controller {
     @ResponseBody
     public String transferFile(@RequestParam long fromId, @RequestParam long toId, @RequestParam long id) throws InternalServerError, BadRequestException {
         try {
-            return storageService.transferFile(fromId,toId,id);
+            return fileService.transferFile(fromId,toId,id);
         } catch (BadRequestException e) {
             e.printStackTrace();
             throw new BadRequestException(e.getMessage());
@@ -59,7 +61,7 @@ public class Controller {
     public String delete(@RequestParam Long id) throws Exception {
         String message;
         try {
-            storageService.delete(id);
+            fileService.delete(id);
             message = "Item with id :"+id+" is deleted.";
             return message;
         } catch (BadRequestException e) {

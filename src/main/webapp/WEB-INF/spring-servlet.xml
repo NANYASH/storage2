@@ -10,6 +10,7 @@
 
     <context:component-scan base-package ="com"/>
     <bean id="StorageService" class="com.StorageService"/>
+    <bean id="FileService" class="com.FileService"/>
     <bean id="FileDAO" class="com.dao.FileDAO"/>
     <bean id="StorageDAO" class="com.dao.StorageDAO"/>
 
