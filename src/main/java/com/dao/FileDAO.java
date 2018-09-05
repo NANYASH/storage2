@@ -11,18 +11,19 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class FileDAO extends GenericDAO<File> {
-     private static final String VALIDATE_STORAGE = "SELECT ID FROM STORAGE " +
+     private static final String VALIDATE_TRANSFER_FILE = "SELECT ID FROM STORAGE " +
             "WHERE ID = ? AND " +
-            "FORMATS_SUPPORTED = (SELECT FILE_FORMAT FROM С_FILE WHERE ID = ?) AND " +
+            "CONTAINS(FORMATS_SUPPORTED,(SELECT FILE_FORMAT FROM С_FILE WHERE ID = ?)) > 0 AND " +
             "(STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > (SELECT FILE_SIZE FROM С_FILE WHERE ID = ?)";
     private static final String TRANSFER_FILE = "UPDATE С_FILE SET ID_STORAGE = ? " +
             "WHERE ID_STORAGE = ? AND ID = ?";
 
-    private static final String VALIDATE_FILE = "SELECT ID " +
+    private static final String VALIDATE_PUT_FILE = "SELECT ID " +
             "FROM STORAGE " +
             "WHERE ID = ? AND " +
-            "FORMATS_SUPPORTED = ? AND " +
-            "STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ? ),0) > ?";
+            "CONTAINS(FORMATS_SUPPORTED,?) > 0 AND " +
+            "STORAGE_SIZE - NVL((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ? ),0) > ?";
+
 
     private static final String PUT_FILE = "INSERT INTO С_FILE(ID,FILE_NAME,FILE_FORMAT,FILE_SIZE,ID_STORAGE) " +
             "VALUES(FILE_SEQ.NEXTVAL,?,?,?,?)";
@@ -33,7 +34,7 @@ public class FileDAO extends GenericDAO<File> {
     public File save(File file) throws InternalServerError {
         Transaction tr = null;
         try(Session session = createSessionFactory().openSession()) {
-            NativeQuery validateQuery = session.createNativeQuery(VALIDATE_FILE);
+            NativeQuery validateQuery = session.createNativeQuery(VALIDATE_PUT_FILE);
             NativeQuery insertQuery = session.createNativeQuery(PUT_FILE);
             validateQuery.setParameter(1,file.getStorage().getId());
             validateQuery.setParameter(2,file.getFormat());
@@ -59,7 +60,7 @@ public class FileDAO extends GenericDAO<File> {
         Transaction tr = null;
         int result = 0;
         try (Session session = createSessionFactory().openSession()) {
-            NativeQuery validateQuery = session.createNativeQuery(VALIDATE_STORAGE);
+            NativeQuery validateQuery = session.createNativeQuery(VALIDATE_TRANSFER_FILE);
             NativeQuery updateQuery = session.createNativeQuery(TRANSFER_FILE);
             validateQuery.setParameter(1, to);
             validateQuery.setParameter(2, fileId);
