@@ -17,7 +17,8 @@ public class StorageDAO extends GenericDAO<Storage> {
     private static final String VALIDATE_STORAGE = "SELECT ID FROM STORAGE " +
             "WHERE ID = ? AND " +
             "CONTAINS(FORMATS_SUPPORTED,(SELECT FORMATS_SUPPORTED FROM STORAGE WHERE ID = ?)) > 0 AND " +
-            "(STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > (COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0))";
+            "(STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > " +
+            "(COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0))";
 
     private static final String TRANSFER_ALL = "UPDATE С_FILE SET ID_STORAGE = ? " +
             "WHERE ID_STORAGE = ?";

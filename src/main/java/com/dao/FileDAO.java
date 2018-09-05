@@ -14,7 +14,8 @@ public class FileDAO extends GenericDAO<File> {
      private static final String VALIDATE_TRANSFER_FILE = "SELECT ID FROM STORAGE " +
             "WHERE ID = ? AND " +
             "CONTAINS(FORMATS_SUPPORTED,(SELECT FILE_FORMAT FROM С_FILE WHERE ID = ?)) > 0 AND " +
-            "(STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > (SELECT FILE_SIZE FROM С_FILE WHERE ID = ?)";
+            "(STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > " +
+             "(SELECT FILE_SIZE FROM С_FILE WHERE ID = ?)";
     private static final String TRANSFER_FILE = "UPDATE С_FILE SET ID_STORAGE = ? " +
             "WHERE ID_STORAGE = ? AND ID = ?";
 
