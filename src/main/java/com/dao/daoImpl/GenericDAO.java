@@ -1,4 +1,4 @@
-package com.dao;
+package com.dao.daoImpl;
 
 import com.exception.InternalServerError;
 import org.hibernate.HibernateException;
@@ -26,25 +26,6 @@ public abstract class GenericDAO<T> {
         System.out.println("Save is done");
         return t;
     }
-
-    public T update(T t) throws InternalServerError {
-        Transaction tr = null;
-        try (Session session = createSessionFactory().openSession()){
-            tr = session.getTransaction();
-            tr.begin();
-            session.update(t);
-            tr.commit();
-        }catch (HibernateException e) {
-            System.err.println(e.getMessage());
-            if (tr != null)
-                tr.rollback();
-            throw new InternalServerError("Internal Server Error");
-        }
-        return t;
-    }
-
-    abstract void delete(long id) throws InternalServerError;
-
 
     public static SessionFactory createSessionFactory(){
         if (sessionFactory == null) {
