@@ -5,6 +5,8 @@ import com.exception.BadRequestException;
 import com.exception.InternalServerError;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.service.impl.FileServiceImpl;
+import com.service.impl.StorageServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,11 +19,17 @@ import java.io.*;
 
 @org.springframework.stereotype.Controller
 public class Controller {
+
+    private StorageServiceImpl storageService;
+    private FileServiceImpl fileService;
+    private ObjectMapper mapper;
+
     @Autowired
-    StorageService storageService;
-    @Autowired
-    FileService fileService;
-    private ObjectMapper mapper = new ObjectMapper();
+    public Controller(StorageServiceImpl storageService, FileServiceImpl fileService) {
+        this.storageService = storageService;
+        this.fileService = fileService;
+        this.mapper = new ObjectMapper();
+    }
 
     @RequestMapping(method = RequestMethod.POST, value = "/put", produces = "text/plain")
     @ResponseBody

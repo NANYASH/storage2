@@ -1,4 +1,4 @@
-package com;
+package com.service.impl;
 
 import com.dao.FileDAO;
 import com.dao.StorageDAO;
@@ -10,10 +10,14 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class StorageService {
+public class StorageServiceImpl{
+
+    private StorageDAO storageDAO;
 
     @Autowired
-    private StorageDAO storageDAO;
+    public StorageServiceImpl(StorageDAO storageDAO) {
+        this.storageDAO = storageDAO;
+    }
 
     public String transferAll(Long storageFromId, Long storageToId) throws BadRequestException, InternalServerError {
         return "Rows updated : " + storageDAO.transferAll(storageFromId,storageToId);

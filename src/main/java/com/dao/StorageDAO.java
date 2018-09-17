@@ -1,6 +1,5 @@
 package com.dao;
 
-import com.entity.File;
 import com.entity.Storage;
 import com.exception.BadRequestException;
 import com.exception.InternalServerError;
@@ -18,7 +17,7 @@ public class StorageDAO extends GenericDAO<Storage> {
             "WHERE ID = ? AND " +
             "CONTAINS(FORMATS_SUPPORTED,(SELECT FORMATS_SUPPORTED FROM STORAGE WHERE ID = ?)) > 0 AND " +
             "(STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > " +
-            "(COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0))";
+            "(NVL((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0))";
 
     private static final String TRANSFER_ALL = "UPDATE С_FILE SET ID_STORAGE = ? " +
             "WHERE ID_STORAGE = ?";
@@ -34,12 +33,13 @@ public class StorageDAO extends GenericDAO<Storage> {
             validateQuery.setParameter(2,from);
             validateQuery.setParameter(3,to);
             validateQuery.setParameter(4,from);
-            updateQuery.setParameter(1,to);
-            updateQuery.setParameter(2,from);
             tr = session.getTransaction();
             tr.begin();
-            if (validateQuery.getSingleResult()!=null)
+            if (validateQuery.getSingleResult()!=null) {
+                updateQuery.setParameter(1,to);
+                updateQuery.setParameter(2,from);
                 result = updateQuery.executeUpdate();
+            }
             tr.commit();
             return result;
         }catch (HibernateException e){

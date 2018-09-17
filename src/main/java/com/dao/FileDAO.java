@@ -12,9 +12,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class FileDAO extends GenericDAO<File> {
      private static final String VALIDATE_TRANSFER_FILE = "SELECT ID FROM STORAGE " +
-            "WHERE ID = ? AND " +
-            "CONTAINS(FORMATS_SUPPORTED,(SELECT FILE_FORMAT FROM С_FILE WHERE ID = ?)) > 0 AND " +
-            "(STORAGE_SIZE - COALESCE((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > " +
+             "WHERE ID = ? AND " +
+             "CONTAINS(FORMATS_SUPPORTED,(SELECT FILE_FORMAT FROM С_FILE WHERE ID = ?)) > 0 AND " +
+             "(STORAGE_SIZE - NVL((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ?),0)) > " +
              "(SELECT FILE_SIZE FROM С_FILE WHERE ID = ?)";
     private static final String TRANSFER_FILE = "UPDATE С_FILE SET ID_STORAGE = ? " +
             "WHERE ID_STORAGE = ? AND ID = ?";
@@ -24,7 +24,6 @@ public class FileDAO extends GenericDAO<File> {
             "WHERE ID = ? AND " +
             "CONTAINS(FORMATS_SUPPORTED,?) > 0 AND " +
             "STORAGE_SIZE - NVL((SELECT SUM(FILE_SIZE) FROM С_FILE WHERE ID_STORAGE = ? ),0) > ?";
-
 
     private static final String PUT_FILE = "INSERT INTO С_FILE(ID,FILE_NAME,FILE_FORMAT,FILE_SIZE,ID_STORAGE) " +
             "VALUES(FILE_SEQ.NEXTVAL,?,?,?,?)";
@@ -41,14 +40,15 @@ public class FileDAO extends GenericDAO<File> {
             validateQuery.setParameter(2,file.getFormat());
             validateQuery.setParameter(3,file.getStorage().getId());
             validateQuery.setParameter(4,file.getSize());
-            insertQuery.setParameter(1,file.getName());
-            insertQuery.setParameter(2,file.getFormat());
-            insertQuery.setParameter(3,file.getSize());
-            insertQuery.setParameter(4,file.getStorage().getId());
             tr = session.getTransaction();
             tr.begin();
-            if (validateQuery.getSingleResult()!=null)
+            if (validateQuery.getSingleResult()!=null) {
+                insertQuery.setParameter(1,file.getName());
+                insertQuery.setParameter(2,file.getFormat());
+                insertQuery.setParameter(3,file.getSize());
+                insertQuery.setParameter(4,file.getStorage().getId());
                 insertQuery.executeUpdate();
+            }
             tr.commit();
             return file;
         }catch (HibernateException e){
@@ -67,13 +67,14 @@ public class FileDAO extends GenericDAO<File> {
             validateQuery.setParameter(2, fileId);
             validateQuery.setParameter(3, to);
             validateQuery.setParameter(4, fileId);
-            updateQuery.setParameter(1,to);
-            updateQuery.setParameter(2,from);
-            updateQuery.setParameter(3,fileId);
             tr = session.getTransaction();
             tr.begin();
-            if (validateQuery.getSingleResult()!=null)
+            if (validateQuery.getSingleResult()!=null) {
+                updateQuery.setParameter(1,to);
+                updateQuery.setParameter(2,from);
+                updateQuery.setParameter(3,fileId);
                 result = updateQuery.executeUpdate();
+            }
             tr.commit();
             return result;
         } catch (HibernateException e) {

@@ -45,15 +45,6 @@ public abstract class GenericDAO<T> {
 
     abstract void delete(long id) throws InternalServerError;
 
-    public T findById(Class<T> c,long id) throws InternalServerError {
-        try(Session session = createSessionFactory().openSession()) {
-            return c.cast(session.get(c, id));
-        }catch (HibernateException e) {
-            System.err.println(e.getMessage());
-            throw new InternalServerError("Internal Server Error");
-        }
-    }
-
 
     public static SessionFactory createSessionFactory(){
         if (sessionFactory == null) {

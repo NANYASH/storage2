@@ -1,4 +1,4 @@
-package com;
+package com.service.impl;
 
 
 import com.dao.FileDAO;
@@ -6,10 +6,17 @@ import com.entity.File;
 import com.exception.BadRequestException;
 import com.exception.InternalServerError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public class FileService {
-    @Autowired
+@Service
+public class FileServiceImpl{
+
     private FileDAO fileDAO;
+
+    @Autowired
+    public FileServiceImpl(FileDAO fileDAO) {
+        this.fileDAO = fileDAO;
+    }
 
     public File put(File file) throws BadRequestException, InternalServerError {
         return fileDAO.save(file);
